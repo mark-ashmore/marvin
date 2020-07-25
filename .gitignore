@@ -1,3 +1,4 @@
 # Ignore byte cache
 
 __pycache__/
+venv/
