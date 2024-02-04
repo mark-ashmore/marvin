@@ -10,23 +10,26 @@ r3 = sr.Recognizer()
 r3.energy_threshold = 50
 
 # Keep in case you need to identify a mic index.
-# for index, name in enumerate(sr.Microphone.list_microphone_names()):
-#     print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
-
+for index, name in enumerate(sr.Microphone.list_microphone_names()):
+    print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
 
 def predict_intent(query):
-    with open('PycharmProjects/personal_assistant/model', 'rb') as f:
+    print('Loading model')
+    with open('model', 'rb') as f:
         vectorizer, model = pickle.load(f)
 
+    print('Making a prediction')
     prediction = model.predict(vectorizer.transform([query]))
     return prediction
 
 
-with sr.Microphone() as source:
+with sr.Microphone(device_index=1) as source:
     print('\nOh, its you... I suppose you need my help with something again')
     resp.say('Oh, its you... I suppose you need my help with something again')
-    audio = r3.listen(source, timeout=6)
+    print('Listening')
+    audio = r3.listen(source, timeout=6, phrase_time_limit=6)
     get = r2.recognize_google(audio)
+    print(get)
     parse = predict_intent(get)
     print('\nOkay, you said', '"' + get + '".')
     resp.say('Okay you said' + get)
