@@ -1,34 +1,48 @@
 import time
 from python_hue_v2 import Hue, BridgeFinder
 
-hue = Hue('0017887e2e47.local.', 'YCMWZq3gYGb7sM8f4-m3POpVnHvneg8VPh96EzYV')  # create Hue instance
+HUE = Hue('0017887e2e47.local.', 'YCMWZq3gYGb7sM8f4-m3POpVnHvneg8VPh96EzYV')  # create Hue instance
 
-def turn_on_light(name: str, brightness: int = 100.00) -> None:
-    """Turn on a Hue light by its name."""
-    lights = hue.lights
-    for light in lights:
-        metadata = light.metadata
-        if metadata['name'] == name:
-            light.on = True
-            light.brightness = brightness
+class Lights:
+    def __init__(self, hue: Hue) -> None:
+        """Class for Hue light controls."""
+        self.hue = hue
 
-def turn_off_light(name: str) -> None:
-    """Turn off a Hue light by its name."""
-    lights = hue.lights
-    for light in lights:
-        metadata = light.metadata
-        if metadata['name'] == name:
-            light.on = False
+    def turn_on_light(self, name: str, brightness: int = 100.00) -> bool:
+        """Turn on a Hue light by its name."""
+        lights = self.hue.lights
+        for light in lights:
+            metadata = light.metadata
+            if metadata['name'] == name:
+                light.on = True
+                light.brightness = brightness
+                return True
+        return False
 
-def change_light_brightness(name: str, brightness: int) -> None:
-    """Change a Hue light brightness by its name."""
-    lights = hue.lights
-    for light in lights:
-        metadata = light.metadata
-        if metadata['name'] == name:
-            light.brightness = brightness
+    def turn_off_light(self, name: str) -> bool:
+        """Turn off a Hue light by its name."""
+        lights = self.hue.lights
+        for light in lights:
+            metadata = light.metadata
+            if metadata['name'] == name:
+                light.on = False
+                return True
+        return False
 
-turn_on_light('Lounge lamp', 100.00)
-turn_off_light('Living room 1')
-time.sleep(10)
-change_light_brightness('Lounge lamp', 50.00)
+    def change_light_brightness(self, name: str, brightness: int) -> bool:
+        """Change a Hue light brightness by its name."""
+        lights = self.hue.lights
+        for light in lights:
+            metadata = light.metadata
+            if metadata['name'] == name:
+                light.brightness = brightness
+                return True
+        return False
+
+my_lights = Lights(HUE)
+
+my_lights.turn_off_light('Lounge lamp')
+my_lights.turn_on_light('Living room 1', 100.00)
+time.sleep(5)
+my_lights.turn_on_light('Lounge lamp')
+my_lights.change_light_brightness('Living room 1', 50.00)
