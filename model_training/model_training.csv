@@ -1,0 +1,85 @@
+intent,utterance
+search,search youtube
+search,do a search on youtube
+search,can I search youtube
+search,help me search YouTube
+set_timer,"Set a timer for 20 minutes, please."
+set_timer,Remind me to take the cookies out of the oven in 15 minutes.
+set_timer,Can you count down 30 minutes for my meditation session?
+set_timer,"Hey, set a timer for 45 minutes for my workout."
+set_timer,Beep in 10 minutes to let me know the laundrys done.
+set_timer,Give me a heads-up in 2 hours when the meeting starts.
+set_timer,Dont forget to remind me to water the plants in 30 minutes.
+set_timer,Is there a way to set a timer for 1 hour and 45 minutes?
+set_timer,Can you buzz me in 5 minutes so I dont overcook the pasta?
+set_timer,"Set a timer for 20 minutes, label it parking meter."
+set_timer,Remind me to take the chicken out of the freezer in 2 hours.
+set_timer,"Hey, in 15 minutes, let me know its time to flip the pancakes."
+set_timer,Beep in 30 minutes to remind me to take my medication.
+set_timer,Is it possible to set a timer for 45 minutes with a custom label like yoga practice?
+set_timer,"Buzz me in 10 minutes, just before the presentation starts."
+set_timer,"Dont forget to remind me to feed the cat in 30 minutes, please."
+set_timer,Is there a way to set a timer for 1 hour and 45 minutes for the cake to bake?
+set_timer,Can you buzz me in 5 minutes so I dont miss my call?
+set_timer,"Set a timer for 20 minutes, label it important document deadline."
+set_timer,Remind me to defrost the meat in 2 hours for dinner.
+set_timer,"Hey, in 15 minutes, let me know its time to check on the bread in the oven."
+set_timer,Beep in 30 minutes to remind me to do my breathing exercises.
+set_timer,Is it possible to set a timer for 45 minutes with a custom label like reading session?
+set_timer,Buzz me in 10 minutes to let me know the laundrys finished drying.
+set_timer,Dont forget to remind me to pick up the kids in 30 minutes.
+set_timer,Is there a way to set a timer for 1 hour and 45 minutes for the movie to run?
+set_timer,"Can you buzz me in 5 minutes, just before my meeting ends?"
+set_timer,"Set a timer for 20 minutes, label it phone a friend."
+set_timer,"Remind me to water the plants in 2 hours, even if Im not home."
+set_timer,"Hey, in 15 minutes, let me know its time to check the roast in the oven."
+set_timer,Beep in 30 minutes to remind me to take a break from my computer.
+set_timer,Is it possible to set a timer for 45 minutes with a custom label like study session?
+set_timer,Buzz me in 10 minutes so I dont forget to take out the trash.
+set_timer,Dont forget to remind me to pay the bills in 30 minutes.
+set_timer,Is there a way to set a timer for 1 hour and 45 minutes for the car to charge?
+set_timer,Can you buzz me in 5 minutes so I know when to start the next step of the recipe?
+set_timer,"Set a timer for 20 minutes, label it meditation."
+set_timer,Remind me to call the doctor in 2 hours for my appointment.
+set_timer,"Hey, in 15 minutes, let me know its time to put the finishing touches on the cake."
+set_timer,Beep in 30 minutes to remind me to send that important email.
+set_alarm,Set an alarm for 7:00 AM tomorrow.
+set_alarm,Wake me up in 30 minutes.
+set_alarm,Snooze my alarm for 10 more minutes.
+set_alarm,Can you play some calming music when my alarm goes off?
+set_alarm,Change my morning alarm to 6:45 AM.
+set_alarm,Set an alarm for every weekday at 8:00 AM.
+set_alarm,Remind me to wake up at sunrise tomorrow.
+set_alarm,Is there a way to set an alarm with a specific song?
+set_alarm,I need an alarm for 9:30 PM with a gentle nature sound.
+set_alarm,Can you set an alarm that vibrates my smartband instead of making a sound?
+set_alarm,Wake me up in 2 hours for a meeting.
+set_alarm,Change my afternoon alarm to 4:00 PM on Wednesdays.
+set_alarm,Remind me to take my medication when my alarm goes off at 8:00 PM.
+set_alarm,Is it possible to set an alarm with a custom message like Time to exercise!?
+set_alarm,Wake me up in 30 minutes and play the news briefing.
+set_alarm,Change my weekend alarm to 9:00 AM on Saturdays and Sundays.
+set_alarm,Remind me to feed the dog when my alarm goes off at 7:00 AM.
+set_alarm,Is there a way to set an alarm that gradually increases in volume?
+set_alarm,Wake me up at 6:00 AM with a motivational quote.
+set_alarm,Change my bedtime alarm to 10:30 PM on weekdays.
+set_alarm,Remind me to water the plants when my alarm goes off at 9:00 AM.
+set_alarm,Is it possible to set an alarm with a specific radio station?
+set_alarm,Wake me up in 45 minutes and snooze automatically after 10 minutes.
+set_alarm,Change my workout alarm to every other day at 7:30 AM.
+set_alarm,Remind me to call Mom when my alarm goes off at 5:00 PM.
+set_alarm,Is there a way to set an alarm that gradually changes light color?
+set_alarm,Wake me up at 8:00 AM with a gentle rain sound.
+set_alarm,Change my weekend alarm to 10:00 AM on both days.
+set_alarm,Remind me to take my vitamins when my alarm goes off at 9:00 AM.
+set_alarm,Is it possible to set an alarm with a specific audiobook chapter?
+set_alarm,Wake me up in 1 hour and play my favorite playlist.
+set_alarm,Change my alarm on Tuesdays to 6:30 AM.
+set_alarm,Remind me to meditate when my alarm goes off at 7:00 PM.
+set_alarm,Is there a way to set an alarm with a specific news headline?
+set_alarm,Wake me up at 5:00 AM with a sunrise simulation.
+set_alarm,Change my daily alarm to 6:00 AM except for Saturdays.
+set_alarm,Remind me to check the oven when my alarm goes off at 3:00 PM.
+set_alarm,Is it possible to set an alarm that vibrates my phone and smartwatch?
+set_alarm,Wake me up with a positive affirmation at 8:00 AM.
+set_alarm,Change my weekend alarm to off.

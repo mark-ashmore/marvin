@@ -43,7 +43,7 @@ class Fulfillment:
         r1 = sr.Recognizer()
         r1.energy_threshold = 50
         url = 'https://www.google.com/search?q='
-        with sr.Microphone(device_index=1) as source:
+        with sr.Microphone(device_index=0) as source:
             print('\nWhat would you like to search for?')
             say('What would you like to search for')
             audio = r1.listen(source, timeout=6, phrase_time_limit=6)
@@ -62,7 +62,7 @@ class Fulfillment:
     def set_alarm():
         r1 = sr.Recognizer()
         r1.energy_threshold = 50
-        with sr.Microphone(device_index=1) as source:
+        with sr.Microphone(device_index=0) as source:
             print('\nWhat time would you like to set your alarm for?')
             say('What time would you like to set your alarm for')
             audio = r1.listen(source, timeout=6, phrase_time_limit=6)
@@ -100,7 +100,7 @@ class Fulfillment:
     def start_timer():
         r1 = sr.Recognizer()
         r1.energy_threshold = 50
-        with sr.Microphone(device_index=1) as source:
+        with sr.Microphone(device_index=0) as source:
             print('\nHow long would you like to set your timer for?')
             say('How long would you like to set your timer for')
             audio = r1.listen(source, timeout=6, phrase_time_limit=6)
@@ -120,7 +120,7 @@ class Fulfillment:
         r1 = sr.Recognizer()
         r1.energy_threshold = 50
         url = 'https://www.youtube.com/results?search_query='
-        with sr.Microphone(device_index=1) as source:
+        with sr.Microphone(device_index=0) as source:
             print('\nWhat would you like to search for on YouTube?')
             say('What would you like to search for on YouTube')
             audio = r1.listen(source, timeout=6, phrase_time_limit=6)

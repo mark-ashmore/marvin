@@ -23,9 +23,9 @@ def predict_intent(query):
     return prediction
 
 
-with sr.Microphone(device_index=1) as source:
-    print('\nOh, its you... I suppose you need my help with something again')
-    resp.say('Oh, its you... I suppose you need my help with something again')
+with sr.Microphone(device_index=0) as source:
+    print('\nHow can I help you?')
+    resp.say('How can I help you?')
     print('Listening')
     audio = r3.listen(source, timeout=6, phrase_time_limit=6)
     get = r2.recognize_google(audio)

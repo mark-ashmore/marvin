@@ -1,29 +1,20 @@
 # Main pipeline for training and updating the learned model.
 
+import csv
 import pickle
 from datetime import datetime
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import CountVectorizer
 
-import models.set_alarm as sa
-import models.search as se
-import models.start_timer as st
-import models.youtube as yt
-
-data = {
-    **sa.export,
-    **se.export,
-    **st.export,
-    **yt.export
-}
-
-train_data = []
 train_labels = []
-
-for q in data:
-    train_data.append(q)
-    train_labels.append(data[q])
+train_data = []
+with open('model_training/model_training.csv', mode='r', encoding='utf-8', newline='') as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=',')
+    _ = next(csvreader)
+    for row in csvreader:
+        train_labels.append(row[0])
+        train_data.append(row[1])
 
 dev_data, dev_labels = train_data, train_labels
 test_data, test_labels = train_data, train_labels
