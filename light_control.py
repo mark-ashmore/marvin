@@ -8,7 +8,7 @@ class Lights:
         """Class for Hue light controls."""
         self.hue = hue
 
-    def turn_on_light(self, name: str, brightness: int = 100.00) -> bool:
+    def turn_on_light(self, name: str, brightness: float = 100.00) -> bool:
         """Turn on a Hue light by its name."""
         lights = self.hue.lights
         for light in lights:
@@ -29,7 +29,7 @@ class Lights:
                 return True
         return False
 
-    def change_light_brightness(self, name: str, brightness: int) -> bool:
+    def change_light_brightness(self, name: str, brightness: float) -> bool:
         """Change a Hue light brightness by its name."""
         lights = self.hue.lights
         for light in lights:
@@ -39,10 +39,12 @@ class Lights:
                 return True
         return False
 
-my_lights = Lights(HUE)
+if __name__ == '__main__':
+    my_lights = Lights(HUE)
 
-my_lights.turn_off_light('Lounge lamp')
-my_lights.turn_on_light('Living room 1', 100.00)
-time.sleep(5)
-my_lights.turn_on_light('Lounge lamp')
-my_lights.change_light_brightness('Living room 1', 50.00)
+    #my_lights.turn_off_light('Lounge lamp')
+    my_lights.turn_on_light('Living room 1', 100.00)
+    time.sleep(5)
+    #my_lights.turn_on_light('Lounge lamp')
+    my_lights.change_light_brightness('Living room 1', 0.00)
+    my_lights.turn_off_light('Living room 1')

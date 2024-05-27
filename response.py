@@ -1,4 +1,4 @@
-'''Main functions for assistant responses.'''
+"""Main functions for assistant responses."""
 
 import webbrowser
 
@@ -6,14 +6,6 @@ from playsound import playsound
 from google_speech import Speech
 
 import speech_recognition as sr
-
-
-def say(text):
-    lang = 'en'
-    speech = Speech(text, lang)
-    speech.save('/Users/markashmore/projects/marvin/response/output.mp3')
-    playsound('/Users/markashmore/projects/marvin/response/output.mp3')
-
 
 def is_number(s):
     try:
@@ -134,3 +126,7 @@ class Fulfillment:
                 print('error')
             except sr.RequestError as e:
                 print('failed'.format(e))
+
+    @staticmethod
+    def turn_on_lights():
+        r1 = sr.Recognizer()
