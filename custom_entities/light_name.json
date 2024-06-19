@@ -6,20 +6,18 @@
                 "lounge lamp": [
                     "lounge",
                     "lounge lamp",
-                    "living room lamp",
-                    "lounge light"
+                    "living room lamp"
                 ],
                 "kitchen": [
                     "kitchen",
-                    "kitchen lights",
-                    "kitchen cabinet lights",
-                    "cabinet lights"
+                    "kitchen cabinet",
+                    "cabinet"
                 ],
                 "living room": [
                     "living room",
                     "livingroom",
-                    "living room lights",
-                    "livingroom lights"
+                    "living room",
+                    "livingroom"
                 ],
                 "spiro": [
                     "spiro",

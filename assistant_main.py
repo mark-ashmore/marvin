@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import pickle
@@ -10,7 +11,9 @@ from typing import Any
 
 import google.generativeai as genai
 import speech_recognition as sr
+from google.api_core.exceptions import InternalServerError
 from google.cloud import texttospeech
+from google.generativeai.types.generation_types import StopCandidateException
 from Levenshtein import distance
 from playsound import playsound
 
@@ -21,12 +24,14 @@ ALTERNATE_WAKE_WORDS = [
     'computer',
     'deepthought'
 ]
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.7
 DEVICE_INDEX = 0
 ENERGY_THRESHOLD = 4000
+ENTITY_MODEL_PATH = Path(__file__).parent / 'main_pipeline' / 'entity_model'
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
-MODEL_PATH = 'main_pipeline/model'
-PHRASE_TIME_LIMIT = 5
+MODEL_PATH = Path(__file__).parent / 'main_pipeline' / 'model'
+MODEL_TRAINING_PATH = Path(__file__).parent / 'model_training'
+PHRASE_TIME_LIMIT = None
 SIMILARITY_THRESHOLD = 2
 TIMEOUT = 5
 WAKE_SOUND = Path(__file__).parent / 'audio' / 'wake_up.mp3'
@@ -84,11 +89,10 @@ class AgentResponse:
             voice=self.voice,
             audio_config=self.audio_config
         )
-        with open('agent_response.mp3', 'wb') as out:
+        with open('audio/agent_response.mp3', 'wb') as out:
             out.write(response.audio_content)
         print(TextWrapper(width=80).fill(response_message))
         playsound(sound='audio/agent_response.mp3')
-
 
 class DeepThought:
     """Deep Thought is an agent class that will listen to and speak with a user.
@@ -97,8 +101,10 @@ class DeepThought:
     def __init__(self) -> None:
         """Initialize Deep Thought."""
         self._model_path = MODEL_PATH
+        self._entity_model_path = ENTITY_MODEL_PATH
         self.active_listening = False
         self.agent_response = AgentResponse()
+        self.device_index = DEVICE_INDEX
         self.recognizer = sr.Recognizer()
         self.recognizer.energy_threshold = ENERGY_THRESHOLD
         self.genai_model = genai.GenerativeModel(
@@ -118,22 +124,41 @@ class DeepThought:
         self.chat = self.genai_model.start_chat(history=[])
         self.start_up = True
         self._load_model()
+        self._load_entity_model()
+        self.check_for_mics()
 
     def _load_model(self) -> None:
+        """Load model."""
         logger.debug('Loading classifier model.')
-        with open(self._model_path, 'rb') as f:
+        with self._model_path.open('rb') as f:
             self.vectorizer, self.model = pickle.load(f)
 
-    @staticmethod
-    def check_for_mics() -> None:
-        for index, name in enumerate(sr.Microphone.list_microphone_names()):
-            logger.debug(
-                'Microphone named "%s" found for `Microphone(device_index=%s)`',
-                index,
-                name
+    def _load_entity_model(self) -> None:
+        """Load entity phrase matcher model."""
+        logger.debug('Loading phrase matcher model.')
+        with self._entity_model_path.open('rb') as f:
+            self.assistant_phrase_matcher = pickle.load(f)
+
+    def check_for_mics(self) -> None:
+        """Check for available microphones."""
+        mics = [
+            (index, name) for index, name in enumerate(
+                sr.Microphone.list_microphone_names()
             )
+        ]
+        if not mics:
+            print('No mics detected. Please connect a microphone.')
+            exit()
+        mics_string = ''
+        for index, name in mics:
+            mics_string += f'{index} - {name}\n'
+        self.device_index = int(input(
+            'Starting up. Please let me know which microphone I can use:\n\n'
+            f'{mics_string}\n'
+        ))
 
     def _wakeword_detect(self, words: list[str]|Any) -> bool:
+        """Detect wake word."""
         print(words)
         if not words:
             print('no words')
@@ -159,7 +184,14 @@ class DeepThought:
         )
         return min_distance < SIMILARITY_THRESHOLD
 
-    def predict_intent(self, query: str) -> tuple[str, float]:
+    def predict_intent(self, query: str) -> str:
+        """Predict intent.
+
+        If confidence is below threshold, return 'no_match'.
+
+        Returns:
+            str: intent
+        """
         logger.debug('Making a prediction')
         predictions = {
             a: b for a, b in zip(
@@ -169,10 +201,37 @@ class DeepThought:
         }
         prediction = self.model.predict(self.vectorizer.transform([query]))[0]
         confidence = predictions[prediction]
-        return prediction, confidence
+        if confidence < CONFIDENCE_THRESHOLD:
+            prediction = 'no_match'
+        return prediction
+    
+    def get_entity_values(self, query: str, prediction: str) -> list:
+        """Get entity values for the predicted intent.
 
-    def perform_action(self, intent: str, user_input: str) -> None:
+        Returns:
+            list: entity values
+        """
+        doc = self.assistant_phrase_matcher.nlp(query)
+        matches = self.assistant_phrase_matcher.get_matches(doc)
+        return_matches = []
+        if prediction:
+            intent_path = MODEL_TRAINING_PATH / f'{prediction}.json'
+            with intent_path.open('r', encoding='utf-8') as f:
+                intent_dict = json.load(f)
+            intent_entities = intent_dict['entities']
+            if matches:
+                for match in matches:
+                    if match[1].lower() in intent_entities:
+                        return_matches.append(match)
+        return return_matches
+
+    def perform_action(
+            self,
+            intent: str,
+            entities: list,
+            user_input: str) -> None:
         """Perform user action."""
+        print(entities)
         if intent == 'turn_on_lights':
             lights = Lights(HUE)
             try:
@@ -201,31 +260,39 @@ class DeepThought:
                                     'Unfortunately I can\'t help with that yet')
 
     def chat_with_user(self, user_text: str) -> None:
+        """Chat with user."""
         print('\nWaiting for agent...\n')
-        response = self.chat.send_message(user_text)
-        response_text = re.sub(r'\*.*?\*|\(.*?\)', '', response.text)
-        response_text = response_text.replace(
-            '\n\n',
-            ' '
-        ).replace(
-            '\n',
-            ' '
-        ).replace(
-            '  ',
-            ' '
-        ).replace(
-            ':',
-            ' '
-        )
+        try:
+            response = self.chat.send_message(user_text)
+            response_text = re.sub(r'\*.*?\*|\(.*?\)', '', response.text)
+            response_text = response_text.replace(
+                '\n\n',
+                ' '
+            ).replace(
+                '\n',
+                ' '
+            ).replace(
+                '  ',
+                ' '
+            ).replace(
+                ':',
+                ' '
+            )
+        except InternalServerError:
+            response_text = ('Oh, hmm. I seem to be experiencing a glitch. '
+                             'Let\'s try that again if you don\'t mind.')
+        except StopCandidateException:
+            response_text = 'Could you repeat that? I dozed off a bit.'
         self.agent_response.say(response_text)
 
     def listen_for_input(self) -> str:
+        """Listen for input."""
         print('\nListening...\n')
         text = ''
-        with sr.Microphone(device_index=DEVICE_INDEX) as source:
+        with sr.Microphone(device_index=self.device_index) as source:
             try:
                 audio = self.recognizer.listen(
-                    source,
+                    source=source,
                     timeout=TIMEOUT,
                     phrase_time_limit=PHRASE_TIME_LIMIT
                 )
@@ -241,37 +308,70 @@ class DeepThought:
                 return text
         return text
 
-    def chat_with_agent(self, user_input: str):
+    def chat_with_agent(self, user_input: str, greeting: bool = False) -> str:
         """Greet user with message and listen to response."""
-        prediction, confidence = self.predict_intent(user_input)
-        if confidence > CONFIDENCE_THRESHOLD:
-            self.perform_action(prediction, user_input)
-            user_input = self.listen_for_input()
-        else:
-            self.chat_with_user(user_input)
-            user_input = self.listen_for_input()
         if user_input:
             print(f'I heard "{user_input}"')
-            self.chat_with_agent(user_input)
+            prediction = self.predict_intent(user_input)
+            print(prediction)
+            if (prediction != 'no_match') and not greeting:
+                print('Taking an action')
+                entities = self.get_entity_values(user_input, prediction)
+                self.perform_action(prediction, entities, user_input)
+            else:
+                print('Having a chat with user')
+                self.chat_with_user(user_input)
+            return 'active_user'
         else:
-            while self.active_listening:
-                for i in range(5):
-                    user_input = self.listen_for_input()
-                    if user_input:
-                        self.chat_with_agent(user_input)
+            return 'no_input'
+
+    def loop_conversation(self) -> str:
+        """Loop conversation."""
+        user_status = 'user_inactive'
+        for _ in range(5):
+            user_status = self.chat_with_agent(self.listen_for_input())
+            if user_status == 'active_user':
+                break
+        if user_status == 'no_input':
+            user_status = 'user_inactive'
+        return user_status
+
+    def run_conversation(self, greeting: bool = False) -> None:
+        """Run conversation."""
+        if greeting:
+            greetings = [
+                'Hello, Deep Thought.',
+                'Hey there.',
+                'Are you there, Deep Thought?',
+                'Say "Hello", Deep Thought.',
+                'Greetings!',
+                'Good day!',
+                'Hi.',
+                'Salutations.',
+                'Hello.',
+                'Oh, hi there.'
+            ]
+            greeting_message = greetings[randint(0, 9)]
+        user_status = self.chat_with_agent(greeting_message, greeting=greeting)
+        while self.active_listening:
+            while user_status == 'active_user':
+                user_status = self.chat_with_agent(self.listen_for_input())
+            user_status = self.loop_conversation()
+            if user_status == 'user_inactive':
                 self.active_listening = False
 
     def run_wakeword_listen_loop(self) -> None:
+        """Run wakeword listen loop."""
         if self.start_up:
             playsound(WAKE_SOUND)
             self.start_up = False
         while True:
             text = ''
-            with sr.Microphone(device_index=DEVICE_INDEX) as source:
+            with sr.Microphone(device_index=self.device_index) as source:
                 #self.recognizer.adjust_for_ambient_noise(source)
                 try:
                     audio = self.recognizer.listen(
-                        source,
+                        source=source,
                         timeout=WAKE_WORD_TIMEOUT,
                         phrase_time_limit=WAKE_WORD_TIME_LIMIT
                     )
@@ -283,21 +383,8 @@ class DeepThought:
                 except sr.WaitTimeoutError:
                     print('Waited too long')
             if self._wakeword_detect(text.split()):
-                greetings = [
-                    'Hello, Deep Thought.',
-                    'Hey there.',
-                    'Are you there, Deep Thought?',
-                    'Say "Hello", Deep Thought.',
-                    'Greetings!',
-                    'Good day!',
-                    'Hi.',
-                    'Salutations.',
-                    'Hello.',
-                    'Oh, hi there.'
-                ]
-                greeting = greetings[randint(0, 9)]
                 self.active_listening = True
-                self.chat_with_agent(greeting)
+                self.run_conversation(greeting=True)
 
 if __name__ == '__main__':
     deep_thought = DeepThought()

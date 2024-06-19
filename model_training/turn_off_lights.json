@@ -140,5 +140,8 @@
             "intent": "turn_off_lights",
             "count": 1
         }
+    ],
+    "entities": [
+        "light_name"
     ]
 }

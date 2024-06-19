@@ -1,5 +1,6 @@
 """Main pipeline for training and updating the classifier model."""
 
+import json
 import logging
 import pickle
 from datetime import datetime
@@ -8,9 +9,13 @@ from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import CountVectorizer
 from expand_training import get_training
+from phrase_matching import AssistantPhraseMatcher
 
 ENTITIES_PATH = Path(__file__).parent.parent / 'custom_entities'
 TRAINING_PATH = Path(__file__).parent.parent / 'model_training'
+
+MODEL_PATH = Path(__file__).parent / 'model'
+SPACY_MODEL_PATH = Path(__file__).parent / 'entity_model'
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,13 +47,39 @@ def get_features(vectorizer: CountVectorizer, training_data):
 
     return vectorizer, train_features, dev_features
 
-def update_model(c_value, features, labels, vectorizer):
+def update_logistic_regression_model(c_value, features, labels, vectorizer):
     model = LogisticRegression(C=c_value, penalty='l2', random_state=0)
     model.fit(features, labels)
-    with open('main_pipeline/model', 'wb') as f:
+    with MODEL_PATH.open('wb') as f:
         pickle.dump([vectorizer, model], f)
     now = datetime.now()
     logger.info('Model updated at %s', str(now.strftime('%H:%M:%S')))
+
+def prepare_entity_terms(entities_path: Path) -> list[tuple[tuple[str], str]]:
+    """Prepare entity terms for training."""
+    entity_terms = []
+    for entity_file in entities_path.iterdir():
+        if entity_file.is_file():
+            with entity_file.open(mode='r', encoding='utf-8') as source:
+                entity_dict = json.load(source)
+            for label in entity_dict['labels']:
+                synonyms = []
+                eid = label['label']
+                for custom_entities in label['custom_entities'].values():
+                    synonyms.extend(custom_entities)
+                entity_terms.append((tuple(synonyms), eid))
+    return entity_terms
+
+def update_entity_model(
+        assistant_phrase_matcher: AssistantPhraseMatcher
+    ) -> None:
+    entity_terms = prepare_entity_terms(ENTITIES_PATH)
+    for term in entity_terms:
+        assistant_phrase_matcher.add_terms(term[0], term[1])
+    with SPACY_MODEL_PATH.open('wb') as f:
+        pickle.dump(assistant_phrase_matcher, f)
+    now = datetime.now()
+    logger.info('Entity model updated at %s', str(now.strftime('%H:%M:%S')))
 
 def main():
     """Main for main_pipeline which trains the classifier."""
@@ -64,7 +95,14 @@ def main():
         training_data=train_data
     )
 
-    update_model(0.1, train_features, train_labels, vectorizer)
+    update_logistic_regression_model(
+        0.1,
+        train_features,
+        train_labels,
+        vectorizer
+    )
+
+    update_entity_model(AssistantPhraseMatcher())
 
 if __name__ == '__main__':
     main()

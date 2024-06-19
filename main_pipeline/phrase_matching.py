@@ -8,7 +8,7 @@ class AssistantPhraseMatcher:
         self.nlp = spacy.load('en_core_web_sm')
         self.matcher = PhraseMatcher(self.nlp.vocab)
     
-    def add_terms(self, terms: list[str], id: str) -> None:
+    def add_terms(self, terms: list[str]|tuple[str], id: str) -> None:
         """Add list of terms to matcher with ID."""
         patterns = [self.nlp.make_doc(text) for text in terms]
         self.matcher.add(id, patterns)
@@ -19,5 +19,7 @@ class AssistantPhraseMatcher:
         match_list = []
         for match_id, start, end in matches:
             span = doc[start:end]
-            match_list.append((span.text, self.nlp.vocab.strings[match_id], start, end))
+            match_list.append(
+                (span.text, self.nlp.vocab.strings[match_id], start, end)
+            )
         return match_list
