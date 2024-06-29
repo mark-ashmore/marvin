@@ -1,0 +1,43 @@
+2024-06-29 14:39:22,501 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "Say "Hello", Deep Thought."
+2024-06-29 14:39:22,508 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:39:22,509 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:39:47,181 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "what's the highest card in a deck of cards"
+2024-06-29 14:39:47,185 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:39:47,186 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:40:18,307 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "how old is the Burj Khalifa"
+2024-06-29 14:40:18,310 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:40:18,310 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:40:45,240 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "how's your day been going"
+2024-06-29 14:40:45,243 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:40:45,243 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:41:19,242 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "just working on some programming tasks"
+2024-06-29 14:41:19,246 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: turn_on_lights
+2024-06-29 14:41:19,247 | INFO | __main__ | assistant_main.py | chat_with_agent | 328 | Taking an action
+2024-06-29 14:41:40,937 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "that's not what I asked you to do"
+2024-06-29 14:41:40,940 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:41:40,940 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:42:27,020 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "how much wood could a woodchuck chuck if a woodchuck could chuck wood"
+2024-06-29 14:42:27,022 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:42:27,022 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:43:06,966 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "do you often talk to dogs"
+2024-06-29 14:43:06,968 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:43:06,968 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:43:55,716 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "could you add something to my calendar"
+2024-06-29 14:43:55,719 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:43:55,719 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:44:26,336 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "I'm going to the dentist next week"
+2024-06-29 14:44:26,339 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:44:26,339 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:44:58,827 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "I wouldn't have figured you'd like a grill"
+2024-06-29 14:44:58,830 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:44:58,831 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:45:31,568 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "this will be the 12th of July"
+2024-06-29 14:45:31,571 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:45:31,572 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:45:42,220 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "the 12th of July"
+2024-06-29 14:45:42,223 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:45:42,223 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:46:12,224 | INFO | __main__ | assistant_main.py | chat_with_agent | 324 | Agent heard "we'll talk later"
+2024-06-29 14:46:12,227 | INFO | __main__ | assistant_main.py | chat_with_agent | 326 | Intent: no_match
+2024-06-29 14:46:12,228 | INFO | __main__ | assistant_main.py | chat_with_agent | 332 | Having a chat with user
+2024-06-29 14:47:37,122 | INFO | __main__ | assistant_main.py | <module> | 404 | Closing DeepThought agent.

@@ -18,7 +18,6 @@ from google.cloud import texttospeech
 from google.generativeai.types.generation_types import StopCandidateException
 from Levenshtein import distance
 from playsound import playsound
-from spacy.matcher import PhraseMatcher
 
 from agent_actions.light_control import HUE, Lights
 
@@ -54,23 +53,6 @@ f_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 logger.setLevel(level=logging.INFO)
 
-#class AgentResponse:
-#    """A class for agent dialogue."""
-#    def __init__(self) -> None:
-#        self.engine = pyttsx3.init()
-#        self.rate = 180
-#        self.voice = 132
-#        self.voices = self.engine.getProperty('voices')
-#        # Initialize agent voice and rate
-#        self.engine.setProperty('rate', self.rate)
-#        self.engine.setProperty('voice', self.voices[self.voice].id)
-#
-#    def say(self, response_message: str) -> None:
-#        """Wrapper to simplify responses."""
-#        print(response_message)
-#        self.engine.say(response_message)
-#        self.engine.runAndWait()
-
 class AgentResponse:
     """A class using google text to speech to generate natural speech."""
     def __init__(self) -> None:
@@ -92,10 +74,29 @@ class AgentResponse:
             voice=self.voice,
             audio_config=self.audio_config
         )
-        with open('audio/agent_response.mp3', 'wb') as out:
+        audio_file = Path(__file__).parent / 'audio' / 'agent_response.mp3'
+        with audio_file.open(mode='wb') as out:
             out.write(response.audio_content)
         print(TextWrapper(width=80).fill(response_message))
         playsound(sound='audio/agent_response.mp3')
+
+    def save_message(self, response_message: str, file_name: str) -> None:
+        """Generate speech response and save to audio folder."""
+        client = texttospeech.TextToSpeechClient()
+        synthesis_input = texttospeech.SynthesisInput(text=response_message)
+        response = client.synthesize_speech(
+            input=synthesis_input,
+            voice=self.voice,
+            audio_config=self.audio_config
+        )
+        audio_file = Path(__file__).parent / 'audio' / f'{file_name}.mp3'
+        with audio_file.open(mode='wb') as out:
+            out.write(response.audio_content)
+        logger.info('Message written to file.')
+
+    def play_message(self, file_name: str) -> None:
+        """Play audio file from audio folder."""
+        playsound(sound=f'audio/{file_name}.mp3')
 
 class DeepThought:
     """Deep Thought is an agent class that will listen to and speak with a user.
@@ -159,12 +160,10 @@ class DeepThought:
 
     def _wakeword_detect(self, words: list[str]|Any) -> bool:
         """Detect wake word."""
-        print(words)
         if not words:
-            print('no words')
             return False
         if len(words) == 1:
-            print('one word')
+            logger.debug('One wake word detected. %s', str(words))
             min_distance = min(
                 [
                     distance(
@@ -174,6 +173,7 @@ class DeepThought:
                 ]
             )
             return min_distance < SIMILARITY_THRESHOLD
+        logger.debug('Wake words detected. %s', str(words))
         min_distance = min(
             [
                 distance(
@@ -246,9 +246,8 @@ class DeepThought:
                 lights.turn_on_light('Living room 2')
                 self.agent_response.say('Turning on the lights.')
             except ConnectionError:
-                self.agent_response.say(
-                    'Sorry, I run into an issue when trying to turn on your '
-                    'lights.'
+                self.agent_response.play_message(
+                    file_name='hue_connection_error'
                 )
         elif intent == 'turn_off_lights':
             lights = Lights(HUE)
@@ -257,9 +256,8 @@ class DeepThought:
                 lights.turn_off_light('Living room 2')
                 self.agent_response.say('Turning off the lights.')
             except ConnectionError:
-                self.agent_response.say(
-                    'Sorry, I run into an issue when trying to turn on your '
-                    'lights.'
+                self.agent_response.play_message(
+                    file_name='hue_connection_error'
                 )
         else:
             self.agent_response.say(f'I heard you say "{user_input}" and '
@@ -286,10 +284,15 @@ class DeepThought:
                 ' '
             )
         except InternalServerError:
-            response_text = ('Oh, hmm. I seem to be experiencing a glitch. '
-                             'Let\'s try that again if you don\'t mind.')
+            self.agent_response.play_message(
+                file_name='gemini_server_error'
+            )
+            return
         except StopCandidateException:
-            response_text = 'Could you repeat that? I dozed off a bit.'
+            self.agent_response.play_message(
+                file_name='gemini_stop_candidate_error'
+            )
+            return
         self.agent_response.say(response_text)
 
     def listen_for_input(self) -> str:
@@ -305,28 +308,28 @@ class DeepThought:
                 )
                 text = self.recognizer.recognize_google(audio)
             except sr.UnknownValueError:
-                print('Audio not understood.')
+                logger.debug('Audio not understood.')
                 return text
             except sr.RequestError:
-                print('Something went wrong with Google Speech')
+                logger.debug('Something went wrong with Google Speech')
                 return text
             except sr.WaitTimeoutError:
-                print('Waited too long')
+                logger.debug('Waited too long')
                 return text
         return text
 
     def chat_with_agent(self, user_input: str, greeting: bool = False) -> str:
         """Greet user with message and listen to response."""
         if user_input:
-            print(f'I heard "{user_input}"')
+            logger.info('Agent heard "%s"', user_input)
             prediction = self.predict_intent(user_input)
-            print(prediction)
+            logger.info('Intent: %s', prediction)
             if (prediction != 'no_match') and not greeting:
-                print('Taking an action')
+                logger.info('Taking an action')
                 entities = self.get_entity_values(user_input, prediction)
                 self.perform_action(prediction, entities, user_input)
             else:
-                print('Having a chat with user')
+                logger.info('Having a chat with user')
                 self.chat_with_user(user_input)
             return 'active_user'
         else:
@@ -384,11 +387,11 @@ class DeepThought:
                     )
                     text = self.recognizer.recognize_google(audio)
                 except sr.UnknownValueError:
-                    print('Audio not understood.')
+                    logger.debug('Audio not understood.')
                 except sr.RequestError:
-                    print('Something went wrong with Google Speech')
+                    logger.debug('Something went wrong with Google Speech')
                 except sr.WaitTimeoutError:
-                    print('Waited too long')
+                    logger.debug('Waited too long')
             if self._wakeword_detect(text.split()):
                 self.active_listening = True
                 self.run_conversation(greeting=True)
@@ -398,5 +401,5 @@ if __name__ == '__main__':
     try:
         deep_thought.run_wakeword_listen_loop()
     except KeyboardInterrupt:
-        print('\nClosing DeepThought agent.')
+        logger.info('Closing DeepThought agent.')
     #deep_thought.check_for_mics()
