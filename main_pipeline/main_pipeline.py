@@ -8,6 +8,9 @@ from pathlib import Path
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import CountVectorizer
+import spacy
+from spacy.matcher import PhraseMatcher
+
 from expand_training import get_training
 from phrase_matching import AssistantPhraseMatcher
 
@@ -70,16 +73,20 @@ def prepare_entity_terms(entities_path: Path) -> list[tuple[tuple[str], str]]:
                 entity_terms.append((tuple(synonyms), eid))
     return entity_terms
 
-def update_entity_model(
-        assistant_phrase_matcher: AssistantPhraseMatcher
-    ) -> None:
+def update_entity_model() -> None:
+    """Update the entity model."""
+    nlp = spacy.load('en_core_web_sm')
+    matcher = PhraseMatcher(nlp.vocab)
     entity_terms = prepare_entity_terms(ENTITIES_PATH)
     for term in entity_terms:
-        assistant_phrase_matcher.add_terms(term[0], term[1])
-    with SPACY_MODEL_PATH.open('wb') as f:
-        pickle.dump(assistant_phrase_matcher, f)
-    now = datetime.now()
-    logger.info('Entity model updated at %s', str(now.strftime('%H:%M:%S')))
+        patterns = [nlp.make_doc(text) for text in term[0]]
+        matcher.add(term[1], patterns)
+    nlp.to_disk((SPACY_MODEL_PATH / 'nlp'))
+    pickle.dump(matcher, (SPACY_MODEL_PATH / 'matcher.pkl').open(mode='wb'))
+    logger.info(
+        'Entity model updated at %s',
+        str(datetime.now().strftime('%H:%M:%S'))
+    )
 
 def main():
     """Main for main_pipeline which trains the classifier."""
@@ -102,7 +109,7 @@ def main():
         vectorizer
     )
 
-    update_entity_model(AssistantPhraseMatcher())
+    update_entity_model()
 
 if __name__ == '__main__':
     main()

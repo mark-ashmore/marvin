@@ -1,0 +1,14 @@
+2024-06-19 12:45:06,585 | INFO | __main__ | main_pipeline.py | get_features | 41 | Model vectorizer vocab size: 381
+2024-06-19 12:45:06,585 | INFO | __main__ | main_pipeline.py | get_features | 45 | Train features shape: (237, 381)
+2024-06-19 12:45:06,585 | INFO | __main__ | main_pipeline.py | get_features | 46 | Dev features shape: (237, 381)
+2024-06-19 12:45:06,604 | INFO | __main__ | main_pipeline.py | update_logistic_regression_model | 56 | Model updated at 12:45:06
+2024-06-19 12:50:51,425 | INFO | __main__ | main_pipeline.py | get_features | 41 | Model vectorizer vocab size: 381
+2024-06-19 12:50:51,425 | INFO | __main__ | main_pipeline.py | get_features | 45 | Train features shape: (237, 381)
+2024-06-19 12:50:51,426 | INFO | __main__ | main_pipeline.py | get_features | 46 | Dev features shape: (237, 381)
+2024-06-19 12:50:51,444 | INFO | __main__ | main_pipeline.py | update_logistic_regression_model | 56 | Model updated at 12:50:51
+2024-06-19 12:50:52,132 | INFO | __main__ | main_pipeline.py | update_entity_model | 82 | Entity model updated at 12:50:52
+2024-06-29 11:49:38,899 | INFO | __main__ | main_pipeline.py | get_features | 44 | Model vectorizer vocab size: 381
+2024-06-29 11:49:38,900 | INFO | __main__ | main_pipeline.py | get_features | 48 | Train features shape: (237, 381)
+2024-06-29 11:49:38,900 | INFO | __main__ | main_pipeline.py | get_features | 49 | Dev features shape: (237, 381)
+2024-06-29 11:49:38,929 | INFO | __main__ | main_pipeline.py | update_logistic_regression_model | 59 | Model updated at 11:49:38
+2024-06-29 11:49:39,660 | INFO | __main__ | main_pipeline.py | update_entity_model | 86 | Entity model updated at 11:49:39

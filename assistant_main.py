@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import re
+import sys
 from pathlib import Path
 from itertools import pairwise
 from random import randint
@@ -10,14 +11,16 @@ from textwrap import TextWrapper
 from typing import Any
 
 import google.generativeai as genai
+import spacy
 import speech_recognition as sr
 from google.api_core.exceptions import InternalServerError
 from google.cloud import texttospeech
 from google.generativeai.types.generation_types import StopCandidateException
 from Levenshtein import distance
 from playsound import playsound
+from spacy.matcher import PhraseMatcher
 
-from light_control import HUE, Lights
+from agent_actions.light_control import HUE, Lights
 
 AGENT_RESPONSE_PATH = Path(__file__).parent / 'audio' / 'agent_response.mp3'
 ALTERNATE_WAKE_WORDS = [
@@ -135,25 +138,22 @@ class DeepThought:
 
     def _load_entity_model(self) -> None:
         """Load entity phrase matcher model."""
-        logger.debug('Loading phrase matcher model.')
-        with self._entity_model_path.open('rb') as f:
-            self.assistant_phrase_matcher = pickle.load(f)
+        logger.debug('Loading phrase matcher model and nlp.')
+        self.nlp = spacy.load((ENTITY_MODEL_PATH / 'nlp'))
+        self.phrase_matcher = pickle.load(
+            (self._entity_model_path / 'matcher.pkl').open('rb')
+        )
 
     def check_for_mics(self) -> None:
         """Check for available microphones."""
-        mics = [
-            (index, name) for index, name in enumerate(
-                sr.Microphone.list_microphone_names()
-            )
-        ]
+        mics = list(enumerate(sr.Microphone.list_microphone_names()))
         if not mics:
-            print('No mics detected. Please connect a microphone.')
-            exit()
+            sys.exit('No mics detected. Please connect a microphone.')
         mics_string = ''
         for index, name in mics:
             mics_string += f'{index} - {name}\n'
         self.device_index = int(input(
-            'Starting up. Please let me know which microphone I can use:\n\n'
+            'Starting up.\n\nPlease let me know which microphone I can use:\n\n'
             f'{mics_string}\n'
         ))
 
@@ -193,36 +193,43 @@ class DeepThought:
             str: intent
         """
         logger.debug('Making a prediction')
-        predictions = {
-            a: b for a, b in zip(
+        predictions = dict(
+            zip(
                 self.model.classes_,
                 self.model.predict_proba(self.vectorizer.transform([query]))[0]
             )
-        }
+        )
         prediction = self.model.predict(self.vectorizer.transform([query]))[0]
         confidence = predictions[prediction]
         if confidence < CONFIDENCE_THRESHOLD:
             prediction = 'no_match'
         return prediction
-    
+
     def get_entity_values(self, query: str, prediction: str) -> list:
         """Get entity values for the predicted intent.
 
         Returns:
             list: entity values
         """
-        doc = self.assistant_phrase_matcher.nlp(query)
-        matches = self.assistant_phrase_matcher.get_matches(doc)
+        doc = self.nlp(query)
+        matches = self.phrase_matcher(doc)
+        match_list = []
+        for match_id, start, end in matches:
+            span = doc[start:end]
+            match_list.append(
+                (span.text, self.nlp.vocab.strings[match_id], start, end)
+            )
         return_matches = []
         if prediction:
             intent_path = MODEL_TRAINING_PATH / f'{prediction}.json'
             with intent_path.open('r', encoding='utf-8') as f:
                 intent_dict = json.load(f)
             intent_entities = intent_dict['entities']
-            if matches:
-                for match in matches:
-                    if match[1].lower() in intent_entities:
-                        return_matches.append(match)
+            if match_list:
+                return_matches = [
+                    match for match in match_list
+                        if match[1].lower() in intent_entities
+                ]
         return return_matches
 
     def perform_action(
